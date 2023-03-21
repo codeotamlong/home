@@ -5,348 +5,409 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>~</title>
 
-<script>
-  const CONFIG = {
-    commandPathDelimiter: '/',
-    commandSearchDelimiter: ' ',
-    defaultSearchTemplate: 'https://duckduckgo.com/?q={}',
-    openLinksInNewTab: true,
-    suggestionLimit: 4,
-  };
 
-  const COMMANDS = new Map([
-    [
-      'a',
-      {
-        name: 'AWS',
-        suggestions: [
-          'a/cognito/v2/idp/user-pools',
-          'a/dynamodbv2#item-explorer',
+<main>
+    <div id="clock" onload="currentTime()"></div>
+    <commands-component></commands-component>
+    <search-component></search-component>
+</main>
+
+<script>
+    const CONFIG = {
+        commandPathDelimiter: '/',
+        commandSearchDelimiter: ' ',
+        defaultSearchTemplate: 'https://duckduckgo.com/?q={}',
+        openLinksInNewTab: false,
+        suggestionLimit: 4,
+    };
+
+    const COMMANDS = new Map([
+        [
+            'a',
+            {
+                name: 'N/A',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: '.',
+            },
         ],
-        url: 'https://us-west-2.console.aws.amazon.com/console/home',
-      },
-    ],
-    [
-      'b',
-      {
-        name: 'Dribbble',
-        searchTemplate: '/search/{}',
-        suggestions: [
-          'b/shots/popular/product-design',
-          'b/shots/popular/web-design',
+        [
+            'b',
+            {
+                name: 'N/A',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: '.',
+            },
         ],
-        url: 'https://dribbble.com/shots/popular',
-      },
-    ],
-    [
-      'c',
-      {
-        name: 'Calendar',
-        searchTemplate: '/calendar/u/0/r/search?q={}',
-        suggestions: ['c/calendar/u/1/r', 'c/calendar/u/2/r'],
-        url: 'https://calendar.google.com/calendar/u/0/r',
-      },
-    ],
-    [
-      'd',
-      {
-        name: 'Drive',
-        searchTemplate: '/drive/u/0/search?q={}',
-        suggestions: ['d/drive/u/1/my-drive', 'd/drive/u/2/my-drive'],
-        url: 'https://drive.google.com/drive/u/0/my-drive',
-      },
-    ],
-    [
-      'e',
-      {
-        name: 'DALL·E',
-        suggestions: ['e/history', 'e/collections'],
-        url: 'https://labs.openai.com/',
-      },
-    ],
-    [
-      'f',
-      {
-        name: 'Figma',
-        suggestions: [
-          'f/file/new',
-          'f/file/new?editor_type=whiteboard',
-          'f/community',
+        [
+            'c',
+            {
+                name: 'Calendar',
+                searchTemplate: '/calendar/u/0/r/search?q={}',
+                suggestions: ['c/calendar/u/1/r', 'c/calendar/u/2/r'],
+                url: 'https://calendar.google.com/calendar/u/0/r',
+            },
         ],
-        url: 'https://www.figma.com/files/recent',
-      },
-    ],
-    [
-      'g',
-      {
-        name: 'GitHub',
-        searchTemplate: '/search?q={}',
-        suggestions: [
-          'g/topics',
-          'g/trending',
-          'g/collections',
-          'gist.github.com',
+        [
+            'd',
+            {
+                name: 'Drive',
+                searchTemplate: '/drive/u/0/search?q={}',
+                suggestions: ['d/drive/u/1/my-drive', 'd/drive/u/2/my-drive'],
+                url: 'https://drive.google.com/drive/u/0/my-drive',
+            },
         ],
-        url: 'https://github.com',
-      },
-    ],
-    [
-      'h',
-      {
-        name: 'Hypem',
-        searchTemplate: '/search/{}',
-        suggestions: ['h/stack', 'h/mixes', 'h/popular/lastweek', 'h/tags'],
-        url: 'https://hypem.com/popular',
-      },
-    ],
-    ['i', { name: 'ChatGPT', url: 'https://chat.openai.com/chat' }],
-    [
-      'k',
-      {
-        name: 'Keep',
-        searchTemplate: '/u/0/#search/text={}',
-        suggestions: ['k/u/1', 'k/u/2'],
-        url: 'https://keep.google.com/u/0',
-      },
-    ],
-    [
-      'l',
-      {
-        name: 'LinkedIn',
-        searchTemplate: '/search/results/all/?keywords={}',
-        suggestions: ['l/in/me/', 'l/messaging', 'l/jobs'],
-        url: 'https://www.linkedin.com/feed/',
-      },
-    ],
-    [
-      'm',
-      {
-        name: 'Mail',
-        suggestions: ['m/u/1/inbox', 'm/u/2/inbox'],
-        url: 'https://mail.proton.me/u/0/inbox',
-      },
-    ],
-    [
-      'n',
-      {
-        name: 'Notion',
-        suggestions: [
-          'n/7c11e98c9c504ec2aa106dae83c6b803#todo',
-          'n/03aac6c591aa435b90f5c9b007409af3#study',
+        [
+            'e',
+            {
+                name: 'N/A',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: '.',
+            },
         ],
-        url: 'https://www.notion.so',
-      },
-    ],
-    [
-      'o',
-      {
-        name: 'Discord',
-        suggestions: ['o/channels/803833399684628520#friends'],
-        url: 'https://discord.com/channels/@me',
-      },
-    ],
-    [
-      'p',
-      {
-        name: 'Products',
-        searchTemplate: '/search?q={}',
-        suggestions: ['p/products', 'p/topics', 'p/time-travel'],
-        url: 'https://www.producthunt.com',
-      },
-    ],
-    [
-      'r',
-      {
-        name: 'Reddit',
-        searchTemplate: '/search?q={}',
-        suggestions: [
-          'r/r/webdev',
-          'r/r/startpages',
-          'r/r/onebag',
-          'r/r/fujix',
+        [
+            'f',
+            {
+                name: '<u>F</u>acebook',
+                suggestions: [
+                    'f/file/new',
+                    'f/file/new?editor_type=whiteboard',
+                    'f/community',
+                ],
+                url: 'https://www.facebook.com/',
+            },
         ],
-        url: 'https://www.reddit.com',
-      },
-    ],
-    [
-      's',
-      {
-        name: 'Slack',
-        suggestions: ['s/client/T09M5UWSV#shiftnudge'],
-        url: 'https://app.slack.com',
-      },
-    ],
-    [
-      't',
-      {
-        name: 'Twitter',
-        searchTemplate: '/search?q={}',
-        suggestions: [
-          't/explore/tabs/trending',
-          't/hashtag/buildinpublic?f=live',
+        [
+            'g',
+            {
+                name: '<u>G</u>itHub',
+                searchTemplate: '/search?q={}',
+                suggestions: [
+                    'g/topics',
+                    'g/trending',
+                    'g/collections',
+                    'gist.github.com',
+                ],
+                url: 'https://github.com',
+            },
         ],
-        url: 'https://twitter.com/home',
-      },
-    ],
-    ['u', { name: 'Supabase', url: 'https://app.supabase.com/projects' }],
-    [
-      'v',
-      {
-        name: 'Vercel',
-        suggestions: ['v/dashboard/activity', 'v/dashboard/usage'],
-        url: 'https://vercel.com/dashboard',
-      },
-    ],
-    [
-      'w',
-      {
-        name: 'Wikipedia',
-        searchTemplate: '/w/index.php?search={}',
-        suggestions: ['w/wiki/Portal:Current_events', 'w/wiki/Special:Random'],
-        url: 'https://en.wikipedia.org/wiki/Main_Page',
-      },
-    ],
-    [
-      'y',
-      {
-        name: 'YouTube',
-        searchTemplate: '/results?search_query={}',
-        suggestions: ['y/trending', 'y/music', 'y/gaming', 'y/sports'],
-        url: 'https://youtube.com/feed/subscriptions',
-      },
-    ],
-    [
-      '0',
-      {
-        name: 'localhost',
-        searchTemplate: ':{}',
-        suggestions: ['0 54323', '0 8000'],
-        url: 'http://localhost:3000',
-      },
-    ],
-    ['?', { name: 'README', url: 'https://github.com/xvvvyz/tilde' }],
-  ]);
+        [
+            'h',
+            {
+                name: 'GitLab (<u>H</u>)',
+                searchTemplate: '/search?q={}',
+                suggestions: [
+                    'g/topics',
+                    'g/trending',
+                    'g/collections',
+                    'gist.github.com',
+                ],
+                url: 'https://gitlab.com',
+            },
+        ],
+        [
+            'i',
+            {
+                name: '<u>I</u>nstagram',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: 'https://www.instagram.com/',
+            }
+        ],
+        [
+            'j',
+            {
+                name: 'N/A',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: '.',
+            }
+        ],
+        [
+            'k',
+            {
+                name: 'N/A',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: '.',
+            },
+        ],
+        [
+            'l',
+            {
+                name: 'LinkedIn',
+                searchTemplate: '/search/results/all/?keywords={}',
+                suggestions: ['l/in/me/', 'l/messaging', 'l/jobs'],
+                url: 'https://www.linkedin.com/feed/',
+            },
+        ],
+        [
+            'm',
+            {
+                name: 'G<u>m</u>ail',
+                suggestions: [],
+                url: 'https://mail.google.com/mail/u/0',
+                search: '/#search/{}',
+            },
+        ],
+        [
+            'n',
+            {
+                name: 'Notion',
+                suggestions: [
+                    'n/7c11e98c9c504ec2aa106dae83c6b803#todo',
+                    'n/03aac6c591aa435b90f5c9b007409af3#study',
+                ],
+                url: 'https://www.notion.so',
+            },
+        ],
+        [
+            'o',
+            {
+                name: 'Discord',
+                suggestions: ['o/channels/803833399684628520#friends'],
+                url: 'https://discord.com/channels/@me',
+            },
+        ],
+        [
+            'p',
+            {
+                name: '<u>P</u>rotonMail',
+                suggestions: ['m/u/1/inbox', 'm/u/2/inbox'],
+                url: 'https://mail.proton.me/u/0/inbox',
+            },
+        ],
+        [
+            'q',
+            {
+                name: 'N/A',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: '.',
+            },
+        ],
+        [
+            'r',
+            {
+                name: 'Reddit',
+                searchTemplate: '/search?q={}',
+                suggestions: [
+                    'r/r/webdev',
+                    'r/r/startpages',
+                    'r/r/onebag',
+                    'r/r/fujix',
+                ],
+                url: 'https://www.reddit.com',
+            },
+        ],
+        [
+            's',
+            {
+                name: 'N/A',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: '.',
+            },
+        ],
+        [
+            't',
+            {
+                name: '<u>T</u>elegram',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: 'https://web.telegram.org/z/',
+            },
+        ],
+        [
+            'u',
+            {
+                name: '<u>U</u>pWork',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: 'https://www.upwork.com/',
+            }
+        ],
+        [
+            'v',
+            {
+                name: '<u>V</u>oz',
+                suggestions: ['v/dashboard/activity', 'v/dashboard/usage'],
+                url: 'https://voz.vn/',
+            },
+        ],
+        [
+            'w',
+            {
+                name: 'N/A',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: '.',
+            },
+        ],
+        [
+            'x',
+            {
+                name: 'N/A',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: '.',
+            },
+        ],
+        [
+            'y',
+            {
+                name: '<u>Y</u>ouTube',
+                searchTemplate: '/results?search_query={}',
+                suggestions: ['y/trending', 'y/music', 'y/gaming', 'y/sports'],
+                url: 'https://youtube.com/feed/subscriptions',
+            },
+        ],
+        [
+            'z',
+            {
+                name: 'N/A',
+                searchTemplate: '/search/{}',
+                suggestions: [],
+                url: '.',
+            },
+        ],
+        [
+            '0',
+            {
+                name: 'localhost',
+                searchTemplate: ':{}',
+                suggestions: ['0 54323', '0 8000'],
+                url: 'http://localhost:3000',
+            },
+        ],
+        ['?', {
+            name: 'README',
+            url: 'https://github.com/xvvvyz/tilde'
+        }],
+    ]);
 </script>
 
 <style>
-  :root {
-    --color-background: #111;
-    --color-text-subtle: #999;
-    --color-text: #eee;
-    --font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Helvetica,
-      Ubuntu, Roboto, Noto, Segoe UI, Arial, sans-serif;
-    --font-size-1: 1rem;
-    --font-size-2: 3rem;
-    --font-size-base: clamp(16px, 1.2vw, 18px);
-    --font-weight-bold: 700;
-    --font-weight-normal: 400;
-    --line-height-base: 1.4;
-    --space-1: 0.5rem;
-    --space-2: 1rem;
-    --space-3: 4rem;
-    --transition-speed: 200ms;
-  }
-
-  @media (prefers-color-scheme: light) {
     :root {
-      --color-background: #eee;
-      --color-text-subtle: #777;
-      --color-text: #111;
+        --color-background: #111;
+        --color-text-subtle: #999;
+        --color-text: #eee;
+        --font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Helvetica,
+            Ubuntu, Roboto, Noto, Segoe UI, Arial, sans-serif;
+        --font-size-1: 1rem;
+        --font-size-2: 3rem;
+        --font-size-base: clamp(16px, 1.2vw, 18px);
+        --font-weight-bold: 700;
+        --font-weight-normal: 400;
+        --line-height-base: 1.4;
+        --space-1: 0.5rem;
+        --space-2: 1rem;
+        --space-3: 4rem;
+        --transition-speed: 200ms;
     }
-  }
 
-  html {
-    background-color: var(--color-background);
-    color: var(--color-text);
-    font-family: var(--font-family);
-    font-size: var(--font-size-base);
-    line-height: var(--line-height-base);
-  }
+    @media (prefers-color-scheme: light) {
+        :root {
+            --color-background: #eee;
+            --color-text-subtle: #777;
+            --color-text: #111;
+        }
+    }
 
-  body {
-    margin: 0;
-  }
+    html {
+        background-color: var(--color-background);
+        color: var(--color-text);
+        font-family: var(--font-family);
+        font-size: var(--font-size-base);
+        line-height: var(--line-height-base);
+    }
+
+    body {
+        margin: 0;
+    }
 </style>
 
 <template id="commands-template">
-  <style>
-    .commands {
-      columns: 1;
-      list-style: none;
-      margin: 0 auto;
-      max-width: 10rem;
-      padding: 0 0 0 var(--space-1);
-      width: 100vw;
-    }
+    <style>
+        .commands {
+            columns: 1;
+            list-style: none;
+            margin: 0 auto;
+            max-width: 10rem;
+            padding: 0 0 0 var(--space-1);
+            width: 100vw;
+        }
 
-    .command {
-      display: flex;
-      gap: var(--space-2);
-      outline: 0;
-      padding: var(--space-1);
-      text-decoration: none;
-    }
+        .command {
+            display: flex;
+            gap: var(--space-2);
+            outline: 0;
+            padding: var(--space-1);
+            text-decoration: none;
+        }
 
-    .key {
-      color: var(--color-text);
-      display: inline-block;
-      text-align: center;
-      width: 3ch;
-    }
+        .key {
+            color: var(--color-text);
+            display: inline-block;
+            text-align: center;
+            width: 3ch;
+        }
 
-    .name {
-      color: var(--color-text-subtle);
-      transition: color var(--transition-speed);
-    }
+        .name {
+            color: var(--color-text-subtle);
+            transition: color var(--transition-speed);
+        }
 
-    .command:where(:focus, :hover) .name {
-      color: var(--color-text);
-    }
+        .command:where(:focus, :hover) .name {
+            color: var(--color-text);
+        }
 
-    @media (min-width: 500px) {
-      .commands {
-        columns: 2;
-        max-width: 20rem;
-      }
-    }
+        @media (min-width: 500px) {
+            .commands {
+                columns: 2;
+                max-width: 20rem;
+            }
+        }
 
-    @media (min-width: 700px) {
-      .commands {
-        columns: 3;
-        max-width: 30rem;
-      }
-    }
+        @media (min-width: 700px) {
+            .commands {
+                columns: 3;
+                max-width: 30rem;
+            }
+        }
 
-    @media (min-width: 900px) {
-      .commands {
-        columns: 4;
-        max-width: 40rem;
-      }
-    }
+        @media (min-width: 900px) {
+            .commands {
+                columns: 4;
+                max-width: 40rem;
+            }
+        }
 
-    @media (min-width: 1200px) {
-      .commands {
-        columns: 6;
-        max-width: 60rem;
-      }
-    }
-  </style>
-  <nav>
-    <menu class="commands"></menu>
-  </nav>
+        @media (min-width: 1200px) {
+            .commands {
+                columns: 6;
+                max-width: 60rem;
+            }
+        }
+    </style>
+    <nav>
+        <menu class="commands"></menu>
+    </nav>
 </template>
 
 <template id="command-template">
-  <li>
-    <a class="command" rel="noopener noreferrer">
-      <span class="key"></span>
-      <span class="name"></span>
-    </a>
-  </li>
+    <li>
+        <a class="command" rel="noopener noreferrer">
+            <span class="key"></span>
+            <span class="name"></span>
+        </a>
+    </li>
 </template>
 
 <script type="module">
-  class Commands extends HTMLElement {
+    class Commands extends HTMLElement {
     #refs = {
       commands: null,
     };
@@ -371,7 +432,7 @@
         command.href = url;
         if (CONFIG.openLinksInNewTab) command.target = '_blank';
         clone.querySelector('.key').innerText = key;
-        clone.querySelector('.name').innerText = name;
+        clone.querySelector('.name').innerHTML = name;
         this.#refs.commands.append(clone);
       }
     }
@@ -381,127 +442,127 @@
 </script>
 
 <template id="search-template">
-  <style>
-    input,
-    button {
-      -moz-appearance: none;
-      -webkit-appearance: none;
-      background: transparent;
-      border: 0;
-      display: block;
-      outline: 0;
-    }
+    <style>
+        input,
+        button {
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+            border: 0;
+            display: block;
+            outline: 0;
+        }
 
-    .dialog {
-      align-items: center;
-      background: var(--color-background);
-      border: none;
-      display: none;
-      flex-direction: column;
-      height: 100%;
-      justify-content: center;
-      left: 0;
-      padding: 0;
-      top: 0;
-      width: 100%;
-    }
+        .dialog {
+            align-items: center;
+            background: var(--color-background);
+            border: none;
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            justify-content: center;
+            left: 0;
+            padding: 0;
+            top: 0;
+            width: 100%;
+        }
 
-    .dialog[open] {
-      display: flex;
-    }
+        .dialog[open] {
+            display: flex;
+        }
 
-    .form {
-      width: 100%;
-    }
+        .form {
+            width: 100%;
+        }
 
-    .input {
-      font-size: var(--font-size-2);
-      font-weight: var(--font-weight-bold);
-      padding: 0;
-      text-align: center;
-      width: 100%;
-    }
+        .input {
+            font-size: var(--font-size-2);
+            font-weight: var(--font-weight-bold);
+            padding: 0;
+            text-align: center;
+            width: 100%;
+        }
 
-    .suggestions {
-      align-items: center;
-      display: flex;
-      flex-direction: column;
-      flex-wrap: wrap;
-      justify-content: center;
-      list-style: none;
-      margin: var(--space-2) 0 0;
-      overflow: hidden;
-      padding: 0;
-    }
+        .suggestions {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: center;
+            list-style: none;
+            margin: var(--space-2) 0 0;
+            overflow: hidden;
+            padding: 0;
+        }
 
-    .suggestion {
-      cursor: pointer;
-      font-size: var(--font-size-1);
-      padding: var(--space-2);
-      position: relative;
-      transition: color var(--transition-speed);
-      white-space: nowrap;
-      z-index: 1;
-    }
+        .suggestion {
+            cursor: pointer;
+            font-size: var(--font-size-1);
+            padding: var(--space-2);
+            position: relative;
+            transition: color var(--transition-speed);
+            white-space: nowrap;
+            z-index: 1;
+        }
 
-    .suggestion:where(:focus, :hover) {
-      color: var(--color-background);
-    }
+        .suggestion:where(:focus, :hover) {
+            color: var(--color-background);
+        }
 
-    .suggestion::before {
-      background-color: var(--color-text);
-      bottom: var(--space-2);
-      content: ' ';
-      left: var(--space-2);
-      opacity: 0;
-      position: absolute;
-      right: var(--space-2);
-      top: var(--space-2);
-      transform: translateY(0.5em);
-      transition: all var(--transition-speed);
-      z-index: -1;
-    }
+        .suggestion::before {
+            background-color: var(--color-text);
+            bottom: var(--space-2);
+            content: ' ';
+            left: var(--space-2);
+            opacity: 0;
+            position: absolute;
+            right: var(--space-2);
+            top: var(--space-2);
+            transform: translateY(0.5em);
+            transition: all var(--transition-speed);
+            z-index: -1;
+        }
 
-    .suggestion:where(:focus, :hover)::before {
-      opacity: 1;
-      transform: translateY(0);
-    }
+        .suggestion:where(:focus, :hover)::before {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-    .match {
-      color: var(--color-text-subtle);
-      transition: color var(--transition-speed);
-    }
+        .match {
+            color: var(--color-text-subtle);
+            transition: color var(--transition-speed);
+        }
 
-    .suggestion:where(:focus, :hover) .match {
-      color: var(--color-background);
-    }
+        .suggestion:where(:focus, :hover) .match {
+            color: var(--color-background);
+        }
 
-    @media (min-width: 700px) {
-      .suggestions {
-        flex-direction: row;
-      }
-    }
-  </style>
-  <dialog class="dialog">
-    <form autocomplete="off" class="form" method="dialog" spellcheck="false">
-      <input class="input" title="search" type="text" />
-      <menu class="suggestions"></menu>
-    </form>
-  </dialog>
+        @media (min-width: 700px) {
+            .suggestions {
+                flex-direction: row;
+            }
+        }
+    </style>
+    <dialog class="dialog">
+        <form autocomplete="off" class="form" method="dialog" spellcheck="false">
+            <input class="input" title="search" type="text" />
+            <menu class="suggestions"></menu>
+        </form>
+    </dialog>
 </template>
 
 <template id="suggestion-template">
-  <li>
-    <button class="suggestion" type="button"></button>
-  </li>
+    <li>
+        <button class="suggestion" type="button"></button>
+    </li>
 </template>
 
 <template id="match-template">
-  <span class="match"></span>
+    <span class="match"></span>
 </template>
 
 <script type="module">
-  class Search extends HTMLElement {
+    class Search extends HTMLElement {
     #refs = {
       dialog: null,
       form: null,
@@ -749,19 +810,60 @@
   customElements.define('search-component', Search);
 </script>
 
+
+<script>
+    function currentTime() {
+
+        let date = new Date();
+        let hh = date.getHours();
+        let mm = date.getMinutes();
+
+        let session = "AM";
+
+        if (hh === 0) {
+            hh = 12;
+        }
+        if (hh > 12) {
+            hh = hh - 12;
+            session = "PM";
+        }
+
+        hh = (hh < 10) ? "0" + hh : hh;
+        mm = (mm < 10) ? "0" + mm : mm;
+
+        var time = hh + ":" + mm + " " + session;
+
+
+        document.getElementById("clock").innerText = time;
+        let t = setTimeout(function() {
+            currentTime()
+        }, 30000);
+    }
+
+    currentTime();
+</script>
+
 <style>
-  main {
-    align-items: center;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-    padding: var(--space-3) var(--space-2);
-    width: 100vw;
-  }
+    #clock {
+        font-size: 4rem;
+        text-align: center;
+        box-sizing: border-box;
+        justify-content: center;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-3) var(--space-2);
+        color: var(--color-text-subtle);
+    }
 </style>
 
-<main>
-  <commands-component></commands-component>
-  <search-component></search-component>
-</main>
+<style>
+    main {
+        align-items: center;
+        box-sizing: border-box;
+        /*display: flex;*/
+        justify-content: center;
+        min-height: 100vh;
+        padding: var(--space-3) var(--space-2);
+        width: 100vw;
+    }
+</style>
