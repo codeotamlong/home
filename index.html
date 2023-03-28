@@ -358,7 +358,11 @@
             const template = document.getElementById('clock-template');
             const clone = template.content.cloneNode(true);
 
-            clone.querySelector('#clock').innerHTML = this.#getTime();
+            let clock = clone.querySelector('#clock');
+            clock.innerHTML = this.#getTime();
+            setInterval (e => {
+                clock.innerHTML = this.#getTime();
+            }, 15000)
 
             this.shadowRoot.append(clone);
         }
@@ -869,35 +873,6 @@
     }
 
     customElements.define('search-component', Search);
-</script>
-
-
-<script>
-    window.onload = setInterval(function() {
-        let date = new Date();
-        let hh = date.getHours();
-        let mm = date.getMinutes();
-
-        let session = "AM";
-
-        if (hh === 0) {
-            hh = 12;
-        }
-        if (hh > 12) {
-            hh = hh - 12;
-            session = "PM";
-        }
-
-        hh = (hh < 10) ? "0" + hh : hh;
-        mm = (mm < 10) ? "0" + mm : mm;
-
-        var time = hh + ":" + mm + " " + session;
-
-        clockShadow = document.querySelector("body > main > clock-component").shadowRoot.querySelector("#clock");
-        if (clockShadow) {
-            clockShadow.innerText = time;
-        }
-    }, 15000)
 </script>
 
 <style>
