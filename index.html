@@ -25,8 +25,9 @@
         clock24h: false,
         openWeatherApi: "https://api.openweathermap.org/data/2.5/weather?",
         openWeatherQuery: {
-            lat: 21.0294498, // Ha Noi, VN
-            lon: 105.8544441, //Ha Noi, VN
+            /*Ha Noi, VN Geocode (lat, lon)*/
+            lat: 21.0294498,
+            lon: 105.8544441,
             units: "metric",
             lang: "vi",
             appid: "d41c73479c217e9551695ded819e680c"
@@ -400,12 +401,12 @@
             let hh = date.getHours();
             let mm = date.getMinutes();
 
-            let indicator = "AM"
+            let indicator = "AM";
             if (hh > 12) {
                 indicator = "PM";
             }
             if (!CONFIG.clockIndicator){
-                indicator = ""
+                indicator = "";
             }
             
 
@@ -834,8 +835,8 @@
                 this.#refs.input.focus();
 
                 requestAnimationFrame(() => {
-                    // close the search dialog before the next repaint if a character is
-                    // not produced (e.g. if you type shift, control, alt etc.)
+                    /*close the search dialog before the next repaint if a character is
+                    not produced (e.g. if you type shift, control, alt etc.)*/
                     if (!this.#refs.input.value) this.#close();
                 });
 
@@ -957,7 +958,7 @@
             const url = CONFIG.openWeatherApi;
             const params = CONFIG.openWeatherQuery;
             
-            const query = Object.keys(params).map(k => `${esc(k)}=${esc(params[k])}`).join('&')
+            const query = Object.keys(params).map(k => `${esc(k)}=${esc(params[k])}`).join('&');
             const res = await fetch(url+query);
             let data = await res.json();
 
