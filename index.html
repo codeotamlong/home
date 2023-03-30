@@ -7,7 +7,7 @@
 
 
 <main>
-    <!-- <div id="clock" onload="currentTime()"></div> -->
+    <weather-component></weather-component>
     <clock-component></clock-component>
     <commands-component></commands-component>
     <search-component></search-component>
@@ -20,6 +20,17 @@
         defaultSearchTemplate: 'https://duckduckgo.com/?q={}',
         openLinksInNewTab: false,
         suggestionLimit: 4,
+        clockSeperator: ":",
+        clockIndicator: true,
+        clock24h: false,
+        openWeatherApi: "https://api.openweathermap.org/data/2.5/weather?",
+        openWeatherQuery: {
+            lat: 21.0294498, // Ha Noi, VN
+            lon: 105.8544441, //Ha Noi, VN
+            units: "metric",
+            lang: "vi",
+            appid: "d41c73479c217e9551695ded819e680c"
+        }
     };
 
     const COMMANDS = new Map([
@@ -335,8 +346,7 @@
 
 <template id="clock-template">
     <style>
-        #clock {
-            font-size: 4rem;
+        div {
             text-align: center;
             box-sizing: border-box;
             justify-content: center;
@@ -345,8 +355,20 @@
             padding: var(--space-3) var(--space-2);
             color: var(--color-text-subtle);
         }
+
+        #clock {
+            font-size: 4rem;
+        }
+
+        #indicator {
+            font-size: 2rem;
+        }
     </style>
-    <div id="clock"> </div>
+    <div>
+        <span id="clock"></span>
+        <span id="indicator"></span>
+    </div>
+
 </template>
 
 <script type="module">
@@ -359,10 +381,16 @@
             const clone = template.content.cloneNode(true);
 
             let clock = clone.querySelector('#clock');
-            clock.innerHTML = this.#getTime();
+            let indicator = clone.querySelector('#indicator');
+
+            let res = this.#getTime();
+            clock.innerHTML = res.time;
+            indicator.innerHTML = res.indicator;
             setInterval (e => {
-                clock.innerHTML = this.#getTime();
-            }, 15000)
+                res = this.#getTime();
+                clock.innerHTML = res.time;
+                indicator.innerHTML = res.indicator;
+            }, 15000);
 
             this.shadowRoot.append(clone);
         }
@@ -372,22 +400,29 @@
             let hh = date.getHours();
             let mm = date.getMinutes();
 
-            let session = "AM";
+            let indicator = "AM"
+            if (hh > 12) {
+                indicator = "PM";
+            }
+            if (!CONFIG.clockIndicator){
+                indicator = ""
+            }
+            
 
             if (hh === 0) {
                 hh = 12;
             }
-
-            if (hh > 12) {
+            if ((!CONFIG.clock24h)&&(hh > 12)) {
                 hh = hh - 12;
-                session = "PM";
             }
 
             hh = (hh < 10) ? "0" + hh : hh;
             mm = (mm < 10) ? "0" + mm : mm;
 
-            var time = hh + ":" + mm + " " + session;
-            return time;
+            
+            return {
+                time: hh + CONFIG.clockSeperator + mm, 
+                indicator: indicator};
         }
     }
 
@@ -873,6 +908,67 @@
     }
 
     customElements.define('search-component', Search);
+</script>
+
+<template id="weather-template">
+    <style>
+        #temperature {
+            text-align: right;
+            justify-content: center;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-subtle);
+        }
+
+        #weather {
+            text-align: right;
+            justify-content: center;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-subtle);
+        }
+    </style>
+    <div id="temperature"></div>
+    <div id="weather"></div>
+</template>
+
+<script type="module">
+    class Weather extends HTMLElement {
+
+        constructor() {
+            super();
+            this.attachShadow({ mode: 'open' });
+            const template = document.getElementById('weather-template');
+            const clone = template.content.cloneNode(true);
+
+            let temperature = clone.querySelector('#temperature');
+            let weather = clone.querySelector('#weather');
+
+            this.#getWeather().then((res) => {
+                temperature.innerHTML = res.temperature+"&#176;C";
+                weather.innerHTML = res.weather.join(",")
+            });
+
+            this.shadowRoot.append(clone);
+        }
+
+        async #getWeather (){
+            const esc = encodeURIComponent;
+            const url = CONFIG.openWeatherApi;
+            const params = CONFIG.openWeatherQuery;
+            
+            const query = Object.keys(params).map(k => `${esc(k)}=${esc(params[k])}`).join('&')
+            const res = await fetch(url+query);
+            let data = await res.json();
+
+            return {
+                temperature: data.main.temp.toFixed(0),
+                weather: data.weather.map(w => w.description)
+            }
+        }
+    }
+
+    customElements.define('weather-component', Weather);
 </script>
 
 <style>
