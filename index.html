@@ -16,7 +16,9 @@
   const CONFIG = {
     commandPathDelimiter: "/",
     commandSearchDelimiter: " ",
-    defaultSearchTemplate: "https://duckduckgo.com/?q={}",
+    defaultSearchTemplate: "https://s.trung.fun/searxng/?q={}",
+    postSearch: true,
+    postSearchUrl: "https://s.trung.fun/searxng/",
     openLinksInNewTab: false,
     suggestionLimit: 4,
     clockSeperator: ":",
@@ -782,9 +784,28 @@
     }
 
     #execute(query) {
-      const { url } = Search.#parseQuery(query);
+      const { search, url } = Search.#parseQuery(query);
       const target = CONFIG.openLinksInNewTab ? "_blank" : "_self";
-      window.open(url, target, "noopener noreferrer");
+
+      if (search && CONFIG.postSearch){
+        var form = document.createElement("form");
+        form.target = target;
+        form.method = "POST";
+        form.action = CONFIG.postSearchUrl;
+        form.style.display = "none";
+
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "q";
+        input.value = search;
+        form.appendChild(input);
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+      } else {
+        window.open(url, target, "noopener noreferrer");
+      }
       this.#close();
     }
 
