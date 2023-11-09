@@ -99,8 +99,8 @@
         name: "<u>G</u>itHub",
         searchTemplate: "/search?q={}",
         suggestions: [
-          "g/topics",
-          "g/trending",
+          "g/codeotamlong",
+          "g/ducminh3112",
           "g/collections",
           "gist.github.com",
         ],
@@ -300,7 +300,7 @@
       "?",
       {
         name: "README",
-        url: "https://github.com/codeotamlong/start",
+        url: "https://codeotamlong.github.io/",
       },
     ],
   ]);
@@ -784,10 +784,13 @@
     }
 
     #execute(query) {
-      const { search, url } = Search.#parseQuery(query);
+      const { key, search, splitBy, url } = Search.#parseQuery(query);
       const target = CONFIG.openLinksInNewTab ? "_blank" : "_self";
 
-      if (search && CONFIG.postSearch){
+      console.log({ key, search, splitBy, url })
+      // debugger;
+
+      if (!key && typeof key == "undefined" && search && typeof search !== "undefined" && CONFIG.postSearch){
         var form = document.createElement("form");
         form.target = target;
         form.method = "POST";
